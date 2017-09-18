@@ -17,7 +17,7 @@ Simple application to monitor and log the vitals of a MacBook. Built with bad co
       ```
 
    3. ```shell
-      brew install pcregrep
+      brew install pcre
       ```
 
    4. ```shell
