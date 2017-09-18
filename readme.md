@@ -28,4 +28,6 @@ python main.py /Users/.../test.csv
 python main.py <full filename for logfile> --cron-set <number of minutes>
 ```
 
+If `launchd` is preferred, there is also a sample plist file included.
+
 Enjoy!
