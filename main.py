@@ -7,6 +7,8 @@ import sys
 import os
 import calendar, time
 import subprocess
+from crontab import CronTab
+import getpass
 
 def run_command(command):
     return os.popen(command).read()
@@ -22,6 +24,15 @@ logfile = sys.argv[1]
 if(os.path.exists(logfile) == False):
     with open(logfile, 'w') as of:
         of.write(logfile_titles)    
+
+# Haven't added argparse yet, I know - will do when I have time
+if len(sys.argv) > 3 and sys.argv[2]=="--cron-set":
+    ct = CronTab(user=getpass.getuser())
+    print "Setting the following command to run ever %d minutes for user %s: python '%s/%s' '%s'" % (int(sys.argv[3]),getpass.getuser(),os.getcwd(),sys.argv[0],sys.argv[1])
+    job = ct.new(command="python '%s/%s' '%s'" % (os.getcwd(),sys.argv[0],sys.argv[1]))
+    job.minute.every(int(sys.argv[3]))
+    ct.write()
+    print "Crontab written."
 
 
 chrome_memory_command = "ps aux | grep '/Applications/Google Chrome' | awk '{print $5}' | awk '{sum += $1 } END { print sum }'"
