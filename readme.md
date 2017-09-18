@@ -16,6 +16,14 @@ Simple application to monitor and log the vitals of a MacBook. Built with bad co
       brew install brightness
       ```
 
+   3. ```shell
+      brew install pcregrep
+      ```
+
+   4. ```shell
+      pip install crontab
+      ```
+
 2. Test using a complete path to a log-file of your choice.
 
 ```shell
