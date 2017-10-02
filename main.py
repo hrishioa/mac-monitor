@@ -9,6 +9,7 @@ import calendar, time
 import subprocess
 from crontab import CronTab
 import getpass
+import re
 
 def run_command(command):
     return os.popen(command).read()
@@ -18,7 +19,7 @@ def run_command(command):
 if(len(sys.argv)==1):
     print "Please enter a logfile name."
 
-logfile_titles = "Time, Battery Temperature, Core Temperature, Charge, Remaining Time, Brightness, Free Memory, Total Memory, Chrome Memory\n"
+logfile_titles = "Time, Battery Temperature, Core Temperature, Charge, Remaining Time, Brightness, Free Memory, Total Memory, Chrome Memory, Power\n"
 
 logfile = sys.argv[1]
 if(os.path.exists(logfile) == False):
@@ -29,11 +30,14 @@ if(os.path.exists(logfile) == False):
 if len(sys.argv) > 3 and sys.argv[2]=="--cron-set":
     ct = CronTab(user=getpass.getuser())
     print "Setting the following command to run ever %d minutes for user %s: python '%s/%s' '%s'" % (int(sys.argv[3]),getpass.getuser(),os.getcwd(),sys.argv[0],sys.argv[1])
-    job = ct.new(command="python '%s/%s' '%s'" % (os.getcwd(),sys.argv[0],sys.argv[1]))
+    path = run_command("echo $PATH")
+    shell = run_command("echo $SHELL")
+    path.replace('\n','')
+    shell.replace('\n','')
+    job = ct.new(command="export SHELL=%s; export PATH=%s; export MAILTO=''; python '%s/%s' '%s'" % (shell, path, os.getcwd(),sys.argv[0],sys.argv[1]))
     job.minute.every(int(sys.argv[3]))
     ct.write()
     print "Crontab written."
-
 
 chrome_memory_command = "ps aux | grep '/Applications/Google Chrome' | awk '{print $5}' | awk '{sum += $1 } END { print sum }'"
 
@@ -72,6 +76,14 @@ def get_free_and_total_memory():
 
     return vmStats["Pages free"]/1024/1024, rssTotal/1024/1024
 
+def get_power():
+    amperage_regex = r"mA\):\s([\-\+\d]+?)\s"
+    voltage_regex = r"mV\):\s([\-\+\d]+?)\s"
+    power_info = run_command("system_profiler SPPowerDataType")
+    amperes = float(re.search(amperage_regex,power_info, re.MULTILINE).groups(0)[0])
+    voltage = float(re.search(voltage_regex,power_info, re.MULTILINE).groups(0)[0])
+    return (voltage*amperes)/(1000000)
+
 def write():
     curtime = calendar.timegm(time.gmtime())
     chrome_mem = os.popen("ps aux | grep '/Applications/Google Chrome' | awk '{print $5}' | awk '{sum += $1 } END { print sum }'").read()
@@ -80,9 +92,11 @@ def write():
     battery_charge = run_command("istats battery charge --no-scale --value-only")
     battery_remain = run_command("istats battery remain --no-scale --value-only")
     brightness = run_command("brightness -l | pcregrep -o1 '[\s\S]+(\d+?\.\d+)$'")
+    power = get_power()
     free_mem, total_mem = get_free_and_total_memory()
 
-    outstr = "%f, %s, %s, %s, %s, %s, %f, %f, %s" % (curtime, battery_temp, core_temp, battery_charge, battery_remain, brightness, free_mem, total_mem, chrome_mem)
+
+    outstr = "%f, %s, %s, %s, %s, %s, %f, %f, %s, %f" % (curtime, battery_temp, core_temp, battery_charge, battery_remain, brightness, free_mem, total_mem, chrome_mem, power)
     outstr = outstr.replace('\n','')
 
     with open(logfile, 'a') as of:

@@ -21,7 +21,7 @@ Simple application to monitor and log the vitals of a MacBook. Built with bad co
       ```
 
    4. ```shell
-      pip install crontab
+      pip install python-crontab
       ```
 
 2. Test using a complete path to a log-file of your choice.
