@@ -19,7 +19,7 @@ def run_command(command):
 if(len(sys.argv)==1):
     print "Please enter a logfile name."
 
-logfile_titles = "Time, Battery Temperature, Core Temperature, Charge, Remaining Time, Brightness, Free Memory, Total Memory, Chrome Memory, Power\n"
+logfile_titles = "Time,Battery Temperature,Core Temperature,Charge,Remaining Time,Brightness,Free Memory,Total Memory,Chrome Memory,Power\n"
 
 logfile = sys.argv[1]
 if(os.path.exists(logfile) == False):
