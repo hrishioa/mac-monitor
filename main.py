@@ -32,9 +32,9 @@ if len(sys.argv) > 3 and sys.argv[2]=="--cron-set":
     print "Setting the following command to run ever %d minutes for user %s: python '%s/%s' '%s'" % (int(sys.argv[3]),getpass.getuser(),os.getcwd(),sys.argv[0],sys.argv[1])
     path = run_command("echo $PATH")
     shell = run_command("echo $SHELL")
-    path.replace('\n','')
-    shell.replace('\n','')
-    job = ct.new(command="export SHELL=%s; export PATH=%s; export MAILTO=''; python '%s/%s' '%s'" % (shell, path, os.getcwd(),sys.argv[0],sys.argv[1]))
+    command_str = "export SHELL=%s; export PATH=%s; export MAILTO=''; python '%s/%s' '%s'" % (shell, path, os.getcwd(),sys.argv[0],sys.argv[1])
+    command_str = command_str.replace('\n','')
+    job = ct.new(command=command_str)
     job.minute.every(int(sys.argv[3]))
     ct.write()
     print "Crontab written."
